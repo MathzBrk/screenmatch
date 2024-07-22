@@ -1,12 +1,32 @@
 package br.com.alura.screenmatch.modelos;
 
-public class Titulo {
+import com.google.gson.annotations.SerializedName;
+
+public class Titulo implements Comparable<Titulo> {
     private String nome;
+
     private int releaseYear;
     private boolean inclcudedPlan;
     private double somaAvaliacoes;
     private int totalAssessment;
     private int duracaoEmMinutos;
+
+    public Titulo(String nome, int releaseYear) {
+        this.nome = nome;
+        this.releaseYear = releaseYear;
+    }
+
+    public Titulo(TituloOmdb meuTituloOmdb) {
+        this.nome = meuTituloOmdb.title();
+
+        if(meuTituloOmdb.year().length() > 4) {
+            throw new ErroDeConversaoDeAnoException("Não consegui inverter o ano" +
+                    " porque tem mais de 04 caracteres");
+        }
+        this.releaseYear = Integer.valueOf(meuTituloOmdb.year());
+        String runtime = meuTituloOmdb.runtime().replaceAll("[^0-9]", "");
+        this.duracaoEmMinutos = Integer.valueOf(runtime);
+    }
 
     public String getNome() {
         return nome;
@@ -57,5 +77,17 @@ public class Titulo {
     public double obterMediaAvaliacoes(){
 
         return somaAvaliacoes / totalAssessment;
+    }
+
+    @Override
+    public String toString() {
+        return "(nome = " + nome +
+                ", releaseYear = " + releaseYear + ", duração = " +
+                duracaoEmMinutos   + ")"         ;
+    }
+
+    @Override
+    public int compareTo(Titulo outroTitulo) {
+        return this.getNome().compareTo(outroTitulo.getNome());
     }
 }
