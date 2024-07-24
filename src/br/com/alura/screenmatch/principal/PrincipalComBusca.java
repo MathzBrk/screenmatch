@@ -1,8 +1,6 @@
 package br.com.alura.screenmatch.principal;
 
-import br.com.alura.screenmatch.modelos.ErroDeConversaoDeAnoException;
-import br.com.alura.screenmatch.modelos.Titulo;
-import br.com.alura.screenmatch.modelos.TituloOmdb;
+import br.com.alura.screenmatch.modelos.*;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -26,67 +24,26 @@ public class PrincipalComBusca {
         String busca = "";
         List<Titulo> titulos = new ArrayList<>();
 
-        Gson gson = new GsonBuilder().
-                setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
-                .setPrettyPrinting()
-                .create();
 
         while (!busca.equalsIgnoreCase("sair")) {
 
-            System.out.println("Digite um filme para busca: ");
+            System.out.println("Digite um titulo para busca: ");
             busca = leitura.nextLine();
+            BuscarTitulo buscador = new BuscarTitulo();
+
+            Titulo titulo = buscador.buscarTitulo(busca);
+            titulos.add(titulo);
 
             if(busca.equalsIgnoreCase("sair")){
                 break;
             }
 
-            String encodedBusca = URLEncoder.encode(busca, StandardCharsets.UTF_8);
-            String endereco = "https://www.omdbapi.com/?t=" + encodedBusca + "&apikey=256f3114";
-
-            try {
-                HttpClient client = HttpClient.newHttpClient();
-
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(endereco))
-                        .build();
-
-                HttpResponse<String> response = client
-                        .send(request, HttpResponse.BodyHandlers.ofString());
-
-                String json = response.body();
-                System.out.println(json);
-
-                TituloOmdb meuTituloOmdm = gson.fromJson(json, TituloOmdb.class);
-                System.out.println(meuTituloOmdm);
-
-
-                Titulo meuTitulo = new Titulo(meuTituloOmdm);
-                System.out.println("Titulo ja convertido: ");
-                System.out.println(meuTitulo);
-
-                titulos.add(meuTitulo);
-
-            } catch (NumberFormatException e) {
-                System.out.println("Aconteceu um erro: ");
-                System.out.println(e.getMessage());
-            } catch (IllegalArgumentException e) {
-                System.out.println("Verifique o endereço do uri, erro encontrado");
-            } catch (ErroDeConversaoDeAnoException e) {
-                System.out.println(e.getMensagem());
-            }
         }
         System.out.println(titulos);
 
-        FileWriter escrita = new FileWriter("filmes.json");
-
-        escrita.write(gson.toJson(titulos));
-        escrita.close();
+        GeradorDeArquivo gerador = new GeradorDeArquivo();
+        gerador.gerarArquivoApartirDeLista(titulos);
+        gerador.gerarArquivoDeTitulo(titulos.get(0));
         System.out.println("O programa finalizou corretamente");
-
-
-
-
-
-
     }
 }

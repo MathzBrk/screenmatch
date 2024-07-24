@@ -1,1 +1,0 @@
-nome='Dogville', releaseYear=2003, duração=178
